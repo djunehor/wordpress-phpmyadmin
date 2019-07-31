@@ -1,0 +1,4 @@
+rows_per_page = 20
+csv_file_name = export.csv
+csv_encoding = UTF-8
+base_slug = zacwp_phpmyadmin

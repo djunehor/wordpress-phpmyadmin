@@ -1,0 +1,21 @@
+.widefat {
+	width: auto;
+}
+
+td.simple-table-manager-list-all-even {
+	border: thin solid white;
+}
+
+td.simple-table-manager-list-all-odd {
+	border: thin solid white;
+	background-color: #FFF6EE;
+}
+
+input[type=text] {
+	width: 400px;
+}
+
+textarea {
+	width: 400px;
+	height: 10em;
+}
