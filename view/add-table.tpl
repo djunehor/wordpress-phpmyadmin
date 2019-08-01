@@ -1,24 +1,24 @@
-<link type='text/css' href='<?php echo FILE_CSS ?>' rel='stylesheet' />
+<link type='text/css' href='<?php echo ZACWP_PMA_FILE_CSS ?>' rel='stylesheet' />
 <div class='wrap'>
     <h2>ZacWP PhpMyAdmin - Add Table</h2>
 
     <div class='subsubsub'>
-        <a href="<?php echo $this->url['list_table'] ?>">&lt;&lt; Return to list</a>
+        <a class='page-title-action' href="<?php echo $this->url['list_table'] ?>">&lt;&lt; Return to list</a>
     </div>
 
     <?php
-    if(isset($message)) {
-        echo "<div class='$status'>$message</div>";
+    if(isset($status) && isset($message)) {
+      echo "<div class='$status'><p>$message</p></div>";
     }
     ?>
-    <form method='post' action='<?php echo $this->url['edit_table'] ?>'>
+    <form method='post' action='<?php echo $this->url['edit_table'];?>'>
+<input name="zacwp_table_add_nonce" value="<?php echo $add_nonce; ?>" type="hidden">
 
     <table class='wp-list-table widefat fixed' id='zacwp-add-table'>
         <?php
 		require_once("util.php");
         echo "<tr><th class='simple-table-manager'>Table Name</th><td><input class='form-control' type='text' required name='new_table_name'></td></tr>";
         echo "<tr><th class='simple-table-manager'></th><td><button type='button' onclick='addField()' class='btn btn-success'>Add Column</button></td></tr>";
-
         ?>
     </table>
     <div class="tablenav bottom">

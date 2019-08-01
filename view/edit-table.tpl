@@ -1,4 +1,4 @@
-<link type='text/css' href='<?php echo FILE_CSS ?>' rel='stylesheet' />
+<link type='text/css' href='<?php echo ZACWP_PMA_FILE_CSS ?>' rel='stylesheet' />
 <div class='wrap'>
     <h2>ZacWP PhpMyAdmin - Edit Table</h2>
     <h3>Table Name: <?php echo $table_name; ?></h3>
@@ -8,11 +8,13 @@
     </div>
 
     <?php
-    if(isset($message)) {
-        echo "<div class='$status'>$message</div>";
-}
-?>
-<form method='post' action='<?php echo $this->url['edit_table'] ?>'>
+    if(isset($status) && isset($message)) {
+      echo "<div class='$status'><p>$message</p></div>";
+    }
+
+    ?>
+<form method='post' action='<?php echo $this->url['edit_table'].'&table_name='.$table_name;?>'>
+<input name="zacwp_table_edit_nonce" value="<?php echo $edit_nonce; ?>" type="hidden">
 
 <table class='wp-list-table widefat fixed' id='zacwp-add-table'>
     <?php
@@ -22,16 +24,17 @@
     foreach ($columns as $col) {
     $colType = preg_replace("/[^A-Za-z]/", '', $col->Type);
         echo "<tr id='table-column-".$col->Field."'>" .
-        "<th class='simple-table-manager'><input class='form-control' type='text' name='tab-col[name][]' value='".$col->Field."' ".(in_array($col->Field, $static) ? 'readonly' : '')." required></th>" .
+        "<th class='simple-table-manager'><input class='form-control' type='text' name='tab-col[name][]' value='".$col->Field."' ".(in_array($col->Field, $static) ? 'disabled' : '')." required></th>" .
         "<td><select class='form-control' name='tab-col[type][]' ".(in_array($col->Field, $static) ? 'disabled' : '')." required>" .
                 "<option ".(strtoupper($colType) == 'INT' ? 'selected' : '')." value='INT'>Number</option>" .
                 "<option ".(strtoupper($colType) == 'VARCHAR' ? 'selected' : '')." value='VARCHAR'>Short text (max 255)</option>" .
                 "<option ".(strtoupper($colType) == 'TEXT' ? 'selected' : '')." value='TEXT'>Long Text</option>" .
                 "<option ".(strtoupper($colType) == 'DATE' ? 'selected' : '')." value='DATE'>Date</option>" .
                 "<option ".(strtoupper($colType) == 'TIMESTAMP' ? 'selected' : '')." value='TIMESTAMP'>Timestamp</option>" .
-                " </select></td>" .
-        "<td><button ".( in_array($col->Field, $static) ? 'disabled' : '')." type='button' onclick='removeField('table-column-".$col->Field."')'>Remove</button></td>".
-        "</tr>";
+                " </select></td>";
+        echo "<td><button ".( in_array($col->Field, $static) ? 'disabled' : '')." type='button' onclick=\"removeField('table-column-".$col->Field."')\">Remove</button></td>";
+
+        echo "</tr>";
     }
     echo "<tr><th class='simple-table-manager'></th><td><button type='button' onclick='addField()' class='btn btn-success'>Add Column</button></td></tr>";
 

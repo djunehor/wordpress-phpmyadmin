@@ -1,12 +1,17 @@
-<link type='text/css' href='<?php echo FILE_CSS ?>' rel='stylesheet' />
+<link type='text/css' href='<?php echo ZACWP_PMA_FILE_CSS ?>' rel='stylesheet' />
 <div class='wrap'>
 <h2>ZacWP PhpMyAdmin - List</h2>
 <h3>Table Name: <?php echo $table_name ?></h3>
 	
 <?php 
-	if ($key_word != "") {
+	if (isset($key_word) && !empty($keyword)) {
 		echo "<div class='updated'><p>Found " . number_format($total) . " results for: $key_word &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='" . $this->url['list'] . "'>Exit Search</a></p></div>";
 	}
+?>
+<?php
+    if(isset($status) && isset($message)) {
+      echo "<div class='$status'><p>$message</p></div>";
+}
 ?>
 
 <div class='subsubsub'>

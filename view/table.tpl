@@ -1,4 +1,4 @@
-<link type='text/css' href='<?php echo FILE_CSS ?>' rel='stylesheet' />
+<link type='text/css' href='<?php echo ZACWP_PMA_FILE_CSS ?>' rel='stylesheet' />
 <div class='wrap'>
     <h2>ZacWP PhpMyAdmin - Table List</h2>
     <h3>Database Name: <?php echo $db_name ?></h3>

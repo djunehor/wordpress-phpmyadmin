@@ -1,13 +1,19 @@
-<link type='text/css' href='<?php echo FILE_CSS ?>' rel='stylesheet' />
+<link type='text/css' href='<?php echo ZACWP_PMA_FILE_CSS ?>' rel='stylesheet' />
 <div class='wrap'>
-<h2>ZacWP PhpMyAdmin - Add New</h2>
+<h2>ZacWP PhpMyAdmin - Add Row</h2>
 <h3>Table Name: <?php echo $table_name ?></h3>
 
 	<div class='subsubsub'>
-	<a href="<?php echo $this->url['list'] ?>&table_name=<?php echo $table_name; ?>">&lt;&lt; Return to list</a>
+	<a class='page-title-action' href="<?php echo $this->url['list'] ?>&table_name=<?php echo $table_name; ?>">&lt;&lt; Return to list</a>
 	</div>
+	<?php
+    if(isset($status) && isset($message)) {
+      echo "<div class='$status'><p>$message</p></div>";
+	}
+	?>
 		
-		<form method='post' action='<?php echo $this->url['edit'] ?>'>
+		<form method='post' action='<?php echo $this->url['edit'] ?>&table_name=<?php echo $table_name; ?>'>
+	<input name="zacwp_table_add_row_nonce" value="<?php echo $add_nonce; ?>" type="hidden">
 		<table class='wp-list-table widefat fixed'>
 <?php
 		require_once("util.php");
