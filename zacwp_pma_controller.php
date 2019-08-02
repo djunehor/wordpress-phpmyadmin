@@ -33,6 +33,7 @@ class ZacWP_PMA_Controller {
 		$this->slug['edit']     = $settings['base_slug'] . '_edit';
 		$this->slug['edit_table']     = $settings['base_slug'] . '_edit_table';
 		$this->slug['settings'] = $settings['base_slug'] . '_settings';
+		$this->slug['custom_query'] = $settings['base_slug'] . '_custom_query';
 
 		add_action('init', array($this, 'zacwp_export_csv'));
 		add_action('admin_menu', array($this, 'zacwp_add_menu'));
@@ -44,6 +45,7 @@ class ZacWP_PMA_Controller {
 		$this->url['add']      = admin_url('admin.php?page=' . $this->slug['add']);
 		$this->url['add_table']      = admin_url('admin.php?page=' . $this->slug['add_table']);
 		$this->url['settings'] = admin_url('admin.php?page=' . $this->slug['settings']);
+		$this->url['custom_query'] = admin_url('admin.php?page=' . $this->slug['custom_query']);
 	}
 
 	public function zacwp_add_menu() {
@@ -54,6 +56,7 @@ class ZacWP_PMA_Controller {
 		add_submenu_page($this->slug['list_table'], 'PhpMyAdmin Table Manager - Settings', 'Settings', 'manage_options', $this->slug['settings'], array($this, 'zacwp_settings'));
 		add_submenu_page(null, 'PhpMyAdmin Table Manager - Table - Edit Record', 'Edit', 'manage_options', $this->slug['edit'], array($this, 'zacwp_edit'));
 		add_submenu_page(null, 'PhpMyAdmin Table Manager - Table Edit', 'Edit Table', 'manage_options', $this->slug['edit_table'], array($this, 'zacwp_edit_table'));
+		add_submenu_page($this->slug['list_table'], 'PhpMyAdmin Table Manager - Custom Query', 'Custom Query', 'manage_options', $this->slug['custom_query'], array($this, 'zacwp_custom_query'));
 	}
 
 	public function zacwp_table_all() {
@@ -492,11 +495,103 @@ class ZacWP_PMA_Controller {
 		}
 	}
 
-	public function zacwp_valid_csv_name($name) {
-		$array = explode(",", $name);
-		if(count($array) != 2) return false;
-		if(strtolower($array[1])) return false;
+	public function zacwp_custom_query($name) {
+		if(current_user_can('manage_options')) {
+			global $wpdb;
+			$user = wp_get_current_user();
+
+			if ( isset( $_POST['run-query'] )
+			     && isset( $_POST['zacwp_table_custom_query_nonce'] )
+			     && wp_verify_nonce( sanitize_text_field( $_REQUEST['zacwp_table_custom_query_nonce'] ), 'zacwp_table_custom_query' )
+
+			) {
+
+				// check table validity
+				if ( ! isset( $_POST['zacwp_custom_query'] )
+				     || empty( $_POST['zacwp_custom_query'] )
+				) {
+					$status  = "error";
+					$message = "No query specified!";
+				} else if ( $invalid = $this->zacwp_validate_query( filter_var( $_POST['zacwp_custom_query'] ) ) ) {
+					$status  = "error";
+					$message = "Invalid Syntax: $invalid";
+				} elseif(
+					!isset($_POST['zacwp_my_password'])
+					|| !wp_check_password( sanitize_text_field($_POST['zacwp_my_password']), $user->data->user_pass, $user->ID) ) {
+					$status  = "error";
+					$message = "Invalid Password!";
+				} else {
+
+					// gather new setting params
+					$query  = sanitize_text_field( $_POST['zacwp_custom_query'] );
+					$result = $wpdb->query( $query );
+
+					if ( $result ) {
+						$status  = "updated";
+						$message = "Query executed: $result row(s) affected";
+					} else {
+						$status  = "error";
+						$message = "Query failed: $result";
+					}
+
+				}
+
+				// restore ini file with default settings
+			}
+		}
+
+			$custom_nonce = wp_create_nonce('zacwp_table_custom_query');
+			include( ZACWP_PMA_FILE_VIEW_CUSTOM);
+		}
+
+	public function zacwp_validate_query($query) {
+		if(!$mysqli = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)) {
+			return true;
+		}
+		if ( trim($query) ) {
+			// Replace characters within string literals that may *** up the process
+			$query = $this->replaceCharacterWithinQuotes($query, '#', '%') ;
+			$query = $this->replaceCharacterWithinQuotes($query, ';', ':') ;
+			// Prepare the query to make a valid EXPLAIN query
+			// Remove comments # comment ; or  # comment newline
+			// Remove SET @var=val;
+			// Remove empty statements
+			// Remove last ;
+			// Put EXPLAIN in front of every MySQL statement (separated by ;)
+			$query = "EXPLAIN " .
+			         preg_replace(Array("/#[^\n\r;]*([\n\r;]|$)/",
+				         "/[Ss][Ee][Tt]\s+\@[A-Za-z0-9_]+\s*=\s*[^;]+(;|$)/",
+				         "/;\s*;/",
+				         "/;\s*$/",
+				         "/;/"),
+				         Array("","", ";","", "; EXPLAIN "), $query) ;
+
+			foreach(explode(';', $query) as $q) {
+				$result = $mysqli->query($q) ;
+				$err = !$result ? $mysqli->error : false ;
+				if ( ! is_object($result) && ! $err ) $err = "Unknown SQL error";
+				if ( $err) return $err ;
+			}
+			return false ;
+		}
 	}
-	
-}
+
+	public  function replaceCharacterWithinQuotes($str, $char, $repl) {
+		if ( strpos( $str, $char ) === false ) return $str ;
+
+		$placeholder = chr(7) ;
+		$inSingleQuote = false ;
+		$inDoubleQuotes = false ;
+		for ( $p = 0 ; $p < strlen($str) ; $p++ ) {
+			switch ( $str[$p] ) {
+				case "'": if ( ! $inDoubleQuotes ) $inSingleQuote = ! $inSingleQuote ; break ;
+				case '"': if ( ! $inSingleQuote ) $inDoubleQuotes = ! $inDoubleQuotes ; break ;
+				case '\\': $p++ ; break ;
+				case $char: if ( $inSingleQuote || $inDoubleQuotes) $str[$p] = $placeholder ; break ;
+			}
+		}
+		return str_replace($placeholder, $repl, $str) ;
+	}
+	}
+
 ?>

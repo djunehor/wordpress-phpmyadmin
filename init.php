@@ -17,6 +17,7 @@ define('ZACWP_PMA_FILE_VIEW_EDIT',  dirname(__FILE__) . "/view/edit.tpl");
 define('ZACWP_PMA_FILE_VIEW_ADD',  dirname(__FILE__) . "/view/add.tpl");
 define('ZACWP_PMA_FILE_TABLE_ADD',  dirname(__FILE__) . "/view/add-table.tpl");
 define('ZACWP_PMA_FILE_TABLE_EDIT',  dirname(__FILE__) . "/view/edit-table.tpl");
+define('ZACWP_PMA_FILE_VIEW_CUSTOM',  dirname(__FILE__) . "/view/custom-query.tpl");
 define('ZACWP_PMA_DELIMITER', ',');
 define('ZACWP_PMA_NEW_LINE', "\r\n");
 define('ZACWP_PMA_NEW_ID_HINT', " - Edit new ID");

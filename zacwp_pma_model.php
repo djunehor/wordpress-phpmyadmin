@@ -43,9 +43,9 @@ class ZacWP_Model {
 		
 		// find primary key & verify whether its type is integer
 		$row = $this->db->get_row("SHOW FIELDS FROM `$this->table_name` WHERE `Key` = 'PRI'");
-		$this->primary_key = $row->Field;
+		$this->primary_key = is_object($row->Field) ? $row->Field : null;
 		$this->pk_is_int = false;
-		if (stristr($row->Type, 'int')) {
+		if (is_object($row->Type) && stristr($row->Type, 'int')) {
 			$this->pk_is_int = true;
 		}
 	}
