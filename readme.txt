@@ -1,6 +1,6 @@
 ﻿=== ZacWP PhpMyAdmin ===
 Contributors: djunehor
-Donate link: https://djunehor.com/djunehor
+Donate link: https://djunehor.com/donate
 Tags: mysql, crud, table, database, simple, export, query
 Requires at least: 4.6
 Tested up to: 5.2
